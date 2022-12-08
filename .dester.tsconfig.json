@@ -1,12 +1,12 @@
 {
   "include": [
-    "/home/rease/data/dev/packages/json-with-comments-parse/src/**/*"
+    "/home/rease/data/dev/packages/json-parse-with-comments/src/**/*"
   ],
   "exclude": [
-    "/home/rease/data/dev/packages/json-with-comments-parse/src/**/node_modules",
-    "/home/rease/data/dev/packages/json-with-comments-parse/src/**/_*",
-    "/home/rease/data/dev/packages/json-with-comments-parse/src/**/*.test.*",
-    "/home/rease/data/dev/packages/json-with-comments-parse/src/**/*.tests.*"
+    "/home/rease/data/dev/packages/json-parse-with-comments/src/**/node_modules",
+    "/home/rease/data/dev/packages/json-parse-with-comments/src/**/_*",
+    "/home/rease/data/dev/packages/json-parse-with-comments/src/**/*.test.*",
+    "/home/rease/data/dev/packages/json-parse-with-comments/src/**/*.tests.*"
   ],
   "compilerOptions": {
     "target": "esnext",
@@ -20,6 +20,6 @@
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
     "allowSyntheticDefaultImports": true,
-    "outDir": "/home/rease/data/dev/packages/json-with-comments-parse/types"
+    "outDir": "/home/rease/data/dev/packages/json-parse-with-comments/types"
   }
 }
