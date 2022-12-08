@@ -1,10 +1,10 @@
-# json-with-comments-parse
+# json-parse-with-comments
 
 Parse JSON with comments
 
 ## Usage:
 ```js
-import parse from 'json-with-comments-parse'
+import parse from 'json-parse-with-comments'
 
 const source = `
   { 

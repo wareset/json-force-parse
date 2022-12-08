@@ -1,5 +1,5 @@
 {
-  "name": "json-with-comments-parse",
+  "name": "json-parse-with-comments",
   "version": "1.0.0",
   "description": "Parse JSON with comments",
   "keywords": [
@@ -9,13 +9,13 @@
     "parse"
   ],
   "license": "MIT",
-  "homepage": "https://github.com/wareset/json-with-comments-parse#readme",
+  "homepage": "https://github.com/wareset/json-parse-with-comments#readme",
   "bugs": {
-    "url": "https://github.com/wareset/json-with-comments-parse/issues"
+    "url": "https://github.com/wareset/json-parse-with-comments/issues"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/wareset/json-with-comments-parse.git"
+    "url": "git+https://github.com/wareset/json-parse-with-comments.git"
   },
   "author": "rease <cftcview@gmail.com>",
   "main": "index",
