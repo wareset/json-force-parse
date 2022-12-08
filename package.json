@@ -1,0 +1,48 @@
+{
+  "name": "json-with-comments-parse",
+  "version": "1.0.0",
+  "description": "Parse JSON with comments",
+  "keywords": [
+    "jsonc",
+    "json",
+    "comments",
+    "parse"
+  ],
+  "license": "MIT",
+  "homepage": "https://github.com/wareset/json-with-comments-parse#readme",
+  "bugs": {
+    "url": "https://github.com/wareset/json-with-comments-parse/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/wareset/json-with-comments-parse.git"
+  },
+  "author": "rease <cftcview@gmail.com>",
+  "main": "index",
+  "module": "index.mjs",
+  "types": "types/index.d.ts",
+  "files": [
+    "README.md",
+    "index.d.ts",
+    "index.js",
+    "index.mjs",
+    "types/**/*"
+  ],
+  "exports": {
+    "./package.json": "./package.json",
+    ".": {
+      "import": "./index.mjs",
+      "require": "./index.js",
+      "types": "./types/index.d.ts"
+    }
+  },
+  "scripts": {
+    "test": "node test/index.js",
+    "build": "dester --ie -m",
+    "dev": "dester --ie -mw"
+  },
+  "devDependencies": {
+    "dester": "1.0.x",
+    "typescript": "^4.8.4"
+  }
+}
