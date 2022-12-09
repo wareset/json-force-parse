@@ -16,7 +16,14 @@ const source = `
   }
 `;
 
-parse(source)
+const res = parse(source)
+console.log(res)
+
+// res:
+{
+  foo: true,
+  bar: 42
+}
 
 ```
 
