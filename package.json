@@ -1,6 +1,6 @@
 {
   "name": "json-parse-with-comments",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Parse JSON with comments",
   "keywords": [
     "jsonc",
@@ -38,11 +38,11 @@
   },
   "scripts": {
     "test": "node test/index.js",
-    "build": "dester --ie -m",
-    "dev": "dester --ie -mw"
+    "build": "dester -m",
+    "dev": "dester -mw"
   },
   "devDependencies": {
     "dester": "1.0.x",
-    "typescript": "^4.9.4"
+    "typescript": "5.7.2"
   }
 }

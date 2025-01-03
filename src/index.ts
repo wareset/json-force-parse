@@ -10,44 +10,51 @@ const META: any = { b: '\b', t: '\t', n: '\n', f: '\f', r: '\r' }
 //   return res
 // }
 
+function save_val(cur: [string, any], key: string, val: any): any {
+  cur[0] === '[' ? cur[1].push(val) : cur[1][key] = val
+  return val
+}
+
+function save_raw(cur: [string, any], s: string, raw: string[]): void {
+  if (raw.length) {
+    save_val(
+      cur, s, (s = raw.join(''),
+      raw[0] === '' ? s
+        : s === 'false' ? false
+          : s === 'true' ? true
+            : s === 'null' ? null
+              : +s)
+    )
+  }
+}
+
 export default function json_with_comments_parse(source: string): any {
+  const __parseInt__ = parseInt
+  const __fromCharCode__ = String.fromCharCode
+  
   const env: [string, any][] = []
   let cur: [string, any] = ['[', env]
 
   let raw: string[] = []
-  let c: string, s: string, b: boolean, n: number
+  let c: string, s: string, n: number
 
   let key: string
-  const save_val = (obj: any): any => {
-    cur[0] === '[' ? cur[1].push(obj) : cur[1][key] = obj
-    return obj
-  }
-  const save_raw = (): void => {
-    if (raw.length) {
-      s = raw.join('')
-      if (raw[0] === '') save_val(s)
-      else if ((b = s === 'true') || s === 'false') save_val(b)
-      else if (s === 'null') save_val(null)
-      else save_val(+s)
-      raw = []
-    }
-  }
 
   for (let l = source.length, i = 0; i < l; i++) {
     if (REG_IS_NOT_EMPTY.test(c = source[i])) {
       switch (c) {
         case ',':
-          save_raw()
+          save_raw(cur, key!, raw), raw = []
           break
         case '[':
-          env.push(cur = [c, save_val([])])
+          env.push(cur = [c, save_val(cur, key!, [])])
           break
         case '{':
-          env.push(cur = [c, save_val({})])
+          env.push(cur = [c, save_val(cur, key!, {})])
           break
         case ']':
         case '}':
-          save_raw()
+          save_raw(cur, key!, raw), raw = []
           env.pop(), cur = env[env.length - 1]
           break
         case ':':
@@ -68,7 +75,7 @@ export default function json_with_comments_parse(source: string): any {
                 : source[++i] in META
                   ? META[source[i]]
                   : source[i] === 'u'
-                    ? String.fromCharCode(parseInt(
+                    ? __fromCharCode__(__parseInt__(
                       source[++i] + source[++i] + source[++i] + source[++i], 16
                     ))
                     : source[i] || ''
@@ -92,6 +99,6 @@ export default function json_with_comments_parse(source: string): any {
       }
     }
   }
-  save_raw()
+  save_raw(cur, key!, raw)
   return env[0]
 }
