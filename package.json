@@ -1,6 +1,6 @@
 {
   "name": "json-parse-with-comments",
-  "version": "1.0.1",
+  "version": "2.0.0",
   "description": "Parse JSON with comments",
   "keywords": [
     "jsonc",
@@ -18,28 +18,27 @@
     "url": "git+https://github.com/wareset/json-parse-with-comments.git"
   },
   "author": "rease <cftcview@gmail.com>",
-  "main": "index",
-  "module": "index.mjs",
+  "main": "dist/index",
+  "module": "dist/index.mjs",
   "types": "types/index.d.ts",
   "files": [
     "README.md",
+    "dist/**/*",
     "index.d.ts",
-    "index.js",
-    "index.mjs",
     "types/**/*"
   ],
   "exports": {
     "./package.json": "./package.json",
     ".": {
-      "import": "./index.mjs",
-      "require": "./index.js",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js",
       "types": "./types/index.d.ts"
     }
   },
   "scripts": {
     "test": "node test/index.js",
-    "build": "dester -m",
-    "dev": "dester -mw"
+    "build": "dester -m --out dist",
+    "dev": "dester -mw --out dist"
   },
   "devDependencies": {
     "dester": "1.0.x"

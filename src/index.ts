@@ -1,104 +1,160 @@
-const REG_IS_NOT_EMPTY = /^\S$/
-const REG_IS_NOT_NEW_LINE = /^[^\r\n\u2028\u2029]$/
+// const RX_JSON = /\{|\}|\[|\]|,|:|"(?:[^\\"]|\\.)*"|[^{}[\],:"\s]+/g
+// \r\n\u2028\u2029
+const RX_JSON =
+  /\{|\}|\[|\]|,|:|"|\/\/[^\r\n]*|\/\*[^]*?(?:\*\/|$)|[^{}[\],:"/\s]+/g
 
-const META: any = { b: '\b', t: '\t', n: '\n', f: '\f', r: '\r' }
+const META_SYMBOLS: any = { b: '\b', t: '\t', n: '\n', f: '\f', r: '\r' }
 
-// const get_escaped_char = (s: string, i: number, i2: number): string => {
-//   let res = s[i] || ''
-//   if (i === i2) res in META && (res = META[s[i]])
-//   else res = String.fromCharCode(parseInt(s[++i] + s[++i] + s[++i] + s[++i], 16))
-//   return res
-// }
+/*@__NO_SIDE_EFFECTS__*/
+export default function parseJson(
+  s: string,
+  reviver?: null | {
+    // (
+    //   this: any[] | { [key: string]: any },
+    //   key: string,
+    //   value: boolean | number | string | null,
+    //   context: { source: string }
+    // ): any
+    // (
+    //   this: any[] | { [key: string]: any },
+    //   key: string,
+    //   value: any[] | { [key: string]: any },
+    //   context: {}
+    // ): any
+    (
+      this: any[] | { [key: string]: any },
+      key: string,
+      value: boolean | number | string | null | any[] | { [key: string]: any },
+      context: { source?: string }
+    ): any
+  },
+  createObjectsWithPrototype?: boolean
+) {
+  let res: any
 
-function save_val(cur: [string, any], key: string, val: any): any {
-  cur[0] === '[' ? cur[1].push(val) : cur[1][key] = val
-  return val
-}
+  if (s !== void 0) {
+    s += ''
+    RX_JSON.lastIndex = 0
 
-function save_raw(cur: [string, any], s: string, raw: string[]): void {
-  if (raw.length) {
-    save_val(
-      cur, s, (s = raw.join(''),
-      raw[0] === '' ? s
-        : s === 'false' ? false
-          : s === 'true' ? true
-            : s === 'null' ? null
-              : +s)
-    )
-  }
-}
+    function error() {
+      throw {
+        error: 'Not valid JSON',
+        index,
+        slice: s.slice(0, index),
+        value: cur.o,
+      }
+    }
 
-export default function json_with_comments_parse(source: string): any {
-  const __parseInt__ = parseInt
-  const __fromCharCode__ = String.fromCharCode
-  
-  const env: [string, any][] = []
-  let cur: [string, any] = ['[', env]
+    const root = {}
+    let cur: { t: '[' | '{'; k?: any; o: any; p?: any } = { t: '{', o: root }
+    let env: (typeof cur)[] = []
 
-  let raw: string[] = []
-  let c: string, s: string, n: number
+    const reviverList = reviver && ([] as [any, any, any, any][])
 
-  let key: string
+    let index = 0
 
-  for (let l = source.length, i = 0; i < l; i++) {
-    if (REG_IS_NOT_EMPTY.test(c = source[i])) {
-      switch (c) {
+    let obj: any
+    let key: any = ''
+    let source: any
+    let val: any
+
+    const toInt = parseInt
+    const charCode = String.fromCharCode
+    const oc =
+      (!createObjectsWithPrototype && Object.create) ||
+      function () {
+        return {}
+      }
+
+    const save = function (v: any, _reviverList?: typeof reviverList) {
+      let k: any
+      if (v !== void 0) {
+        cur.o[
+          (k = key !== void 0 ? key : cur.t === '[' ? cur.o.length : error())
+        ] = v
+        if (_reviverList) _reviverList.push([cur.o, k, v, { source }])
+      }
+      key = val = source = void 0
+      return k
+    }
+
+    let m: RegExpExecArray | null, c: string
+    for (; (m = RX_JSON.exec(s)); ) {
+      index = m.index
+      switch ((c = m[0])[0]) {
+        case ':':
+          if (key !== void 0) error()
+          key = val
+          val = void 0
+          break
         case ',':
-          save_raw(cur, key!, raw), raw = []
+          save(val, reviverList)
           break
         case '[':
-          env.push(cur = [c, save_val(cur, key!, [])])
+          env.push(cur)
+          cur = { t: c as '[', k: save((obj = [])), o: obj, p: cur.o }
           break
         case '{':
-          env.push(cur = [c, save_val(cur, key!, {})])
+          env.push(cur)
+          cur = { t: c as '{', k: save((obj = oc(null))), o: obj, p: cur.o }
           break
         case ']':
         case '}':
-          save_raw(cur, key!, raw), raw = []
-          env.pop(), cur = env[env.length - 1]
+          save(val, reviverList)
+          if ((cur.t === '{') !== (c === '}')) error()
+          if (reviverList && cur.p) reviverList.push([cur.p, cur.k, cur.o, {}])
+          cur = env.pop()!
           break
-        case ':':
-          key = raw.join(''), raw = []
-          break
-        case '"':
-          raw = ['']
-          // for (b = false; ++i < l && (raw.push(source[i]),
-          // b || source[i] !== c); b = b ? false : source[i] === '\\');
-          // for (;++i < l && source[i] !== '"';) {
-          //   raw.push(source[i] !== '\\' ? source[i]
-          //     : get_escaped_char(source, ++i, source[i] !== 'u' ? i : i += 4))
-          // }
-          for (;++i < l && source[i] !== c;) {
+        case '"': {
+          if (val !== void 0) error()
+          const raw = ['']
+          let i = m.index
+          for (let l = s.length, w: string; ++i < l && (w = s[i]) !== c; )
             raw.push(
-              source[i] !== '\\'
-                ? source[i]
-                : source[++i] in META
-                  ? META[source[i]]
-                  : source[i] === 'u'
-                    ? __fromCharCode__(__parseInt__(
-                      source[++i] + source[++i] + source[++i] + source[++i], 16
-                    ))
-                    : source[i] || ''
+              w !== '\\'
+                ? w
+                : (w = s[++i]) in META_SYMBOLS
+                  ? META_SYMBOLS[w]
+                  : w === 'u'
+                    ? charCode(toInt(s[++i] + s[++i] + s[++i] + s[++i], 16))
+                    : w || ''
             )
-          }
+          RX_JSON.lastIndex = ++i
+          val = raw.join('')
+          if (reviverList) source = s.slice(m.index, i)
           break
+        }
         case '/':
-          if ((s = source[i + 1]) === '*') {
-            i++
-            for (n = 0; ++i < l &&
-            !(n++ && source[i] === c && source[i - 1] === s););
-          } else if (s === c) {
-            i++
-            for (;++i < l && REG_IS_NOT_NEW_LINE.test(source[i]););
-          } else {
-            raw.push(c)
-          }
           break
         default:
-          raw.push(c)
+          if (val !== void 0) error()
+          source = c
+          val =
+            c === 'false'
+              ? false
+              : c === 'true'
+                ? true
+                : c === 'null'
+                  ? null
+                  : isNaN((val = +c)) && c !== 'NaN'
+                    ? c
+                    : val
       }
     }
+
+    res = env.length > 0 ? error() : '' in root ? root[''] : val
+
+    if (reviverList) {
+      val = reviverList.length
+      if (val === 0) reviverList[val++] = [{ '': res }, '', res, { source }]
+
+      for (let i = 0; i < val; ++i) {
+        ;(obj = reviverList[i]), (env = obj[0]), (key = '' + obj[1])
+        env[key] = (reviver as any).call(env, key, obj[2], obj[3])
+      }
+      res = reviverList[val - 1][0]['']
+    }
   }
-  save_raw(cur, key!, raw)
-  return env[0]
+
+  return res
 }
