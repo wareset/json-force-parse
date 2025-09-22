@@ -1,21 +1,21 @@
 {
-  "name": "json-parse-with-comments",
-  "version": "2.0.0",
-  "description": "Parse JSON with comments",
+  "name": "json-like-parse",
+  "version": "1.0.0",
+  "description": "Parse JSON5 or JSON like files",
   "keywords": [
     "jsonc",
+    "json5",
     "json",
-    "comments",
     "parse"
   ],
   "license": "MIT",
-  "homepage": "https://github.com/wareset/json-parse-with-comments#readme",
+  "homepage": "https://github.com/wareset/json-like-parse#readme",
   "bugs": {
-    "url": "https://github.com/wareset/json-parse-with-comments/issues"
+    "url": "https://github.com/wareset/json-like-parse/issues"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/wareset/json-parse-with-comments.git"
+    "url": "git+https://github.com/wareset/json-like-parse.git"
   },
   "author": "rease <cftcview@gmail.com>",
   "main": "dist/index",
@@ -24,7 +24,6 @@
   "files": [
     "README.md",
     "dist/**/*",
-    "index.d.ts",
     "types/**/*"
   ],
   "exports": {
@@ -36,7 +35,7 @@
     }
   },
   "scripts": {
-    "test": "node test/index.js",
+    "test": "node test/index.test.js",
     "build": "dester -m --out dist",
     "dev": "dester -mw --out dist"
   },
