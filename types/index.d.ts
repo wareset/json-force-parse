@@ -1,9 +1,7 @@
-export default function parseJson(s: string, reviver?: null | {
-    (this: any[] | {
-        [key: string]: any;
-    }, key: string, value: boolean | number | string | null | any[] | {
-        [key: string]: any;
-    }, context: {
-        source?: string;
-    }): any;
-}, createObjectsWithPrototype?: boolean): any;
+export default function jsonLikeParse(text: string, reviver?: (this: any[] | {
+    [key: string]: any;
+}, key: string, value: boolean | number | string | null | any[] | {
+    [key: string]: any;
+}, context: {
+    source?: string;
+}) => any): string;
