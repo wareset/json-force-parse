@@ -1,9 +1,19 @@
 const assert = require('node:assert')
 
-const jsonLikeParse = require('../dist/index.js').default
+const jsonForceParse = require('../dist/index.js').default
 
 function isEqual(string, result) {
-  assert.deepStrictEqual(jsonLikeParse(string), result)
+  assert.deepStrictEqual(jsonForceParse(string), result)
+}
+
+function isError(string) {
+  let err
+  try {
+    jsonForceParse(string)
+  } catch (e) {
+    err = e
+  }
+  if (!err) throw string
 }
 
 //
@@ -64,6 +74,8 @@ isEqual(`{}//comment`, {})
 isEqual(`{/*comment\n** */}`, {})
 isEqual(`{\t\v\f \u00A0\uFEFF\n\r\u2028\u2029\u2003}`, {})
 
+isEqual('\\', '')
+
 //
 // tests for reviver
 //
@@ -83,19 +95,19 @@ isEqual(`{\t\v\f \u00A0\uFEFF\n\r\u2028\u2029\u2003}`, {})
     return a[1]
   }
 
-  const jsonLikeParseResults = []
-  function jsonLikeParseReviver(...a) {
-    jsonLikeParseResults.push([this, ...a])
+  const jsonForceParseResults = []
+  function jsonForceParseReviver(...a) {
+    jsonForceParseResults.push([this, ...a])
     return a[1]
   }
 
   for (let i = 0; i < data.length; i++) {
     JSON.parse(data[i], jsonOriginReviver)
-    jsonLikeParse(data[i], jsonLikeParseReviver)
+    jsonForceParse(data[i], jsonForceParseReviver)
   }
 
   // console.log(jsonOriginResults)
-  assert.deepStrictEqual(jsonOriginResults, jsonLikeParseResults)
+  assert.deepStrictEqual(jsonOriginResults, jsonForceParseResults)
 })()
 
 //
@@ -148,5 +160,18 @@ isEqual(`{\t\v\f \u00A0\uFEFF\n\r\u2028\u2029\u2003}`, {})
 
   `
 
-  assert.deepStrictEqual(data, jsonLikeParse(json))
+  assert.deepStrictEqual(data, jsonForceParse(json))
 })()
+
+// errors
+isError('[1,2,3')
+isError('[1,2,3]]')
+isError('[1,2,3]}')
+isError('{q:1')
+isError('{q:1}}')
+isError('{q:1}]')
+isError('[1,2,q:3,4]')
+isError('{ q:1, w: , e:3, r:4 }')
+isError('{ q:1, w: 2, :3, r:4 }')
+isError('{ q:1, w:  e :3, r:4 }')
+isError('{ q:1, w:    :3, r:4 }')
