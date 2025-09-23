@@ -1,4 +1,4 @@
-const RX_FOR_PARSING = /\/(?:\/[^\r\n\u2028\u2029]*|\*[^]*?(?:\*\/|$))|[^\s]/g
+const RX_FOR_PARSING = /\/\/[^\r\n\u2028\u2029]*|\/\*[^]*?(?:\*\/|$)|([^\s])/g
 const RX_FOR_STRINGS =
   /\\(?:u([\da-f]{4})|x([\da-f]{2})|(?:\r\n?|\n|\u2028|\u2029)|(.))|([^\\'"]+)|('|")/gi
 const RX_FOR_ANOTHER =
@@ -28,7 +28,7 @@ export default function jsonForceParse(
     context: { source?: string }
   ) => any
 ) {
-  if (text) {
+  if (text != null) {
     function error(message: string): never | void {
       throw {
         error: message,
@@ -66,89 +66,89 @@ export default function jsonForceParse(
     const fromCharCode = String.fromCharCode
     const toInt = parseInt
 
-    const reviverList = reviver && ([] as [any, any, any, any][])
+    const reviverList = reviver && ([] as [number, any, any, any][])
 
     const root: any = {}
     const len = text.length
-    let cur = { o: root } as { t: '[' | '{'; k: string; o: any; p?: any }
+    let cur = { o: root } as { t: '[' | '{'; k: string; o: any; p: any }
     let env: (typeof cur)[] = []
 
     let tmp: any
     let key: any = ''
     let val: any = root
     let index = 0
-    let source: any
+    let source: string
 
     let match: RegExpExecArray | null
     let ch: any
 
     for (; (match = RX_FOR_PARSING.exec(text)); ) {
-      index = match.index
-      switch ((ch = match[0])) {
-        case ',':
-          save(val, 0, 1)
-          break
-        case ':':
-          save(root, 0, 1)
-          key = val
-          val = root
-          break
-        case '[':
-        case '{':
-          save(val)
-          env.push(cur)
-          /**
-           * I use free variables so that I don't create extra
-           * ones just to reduce the size. Because this is the
-           * code in the library, not in the product.
-           */
-          cur = {
-            t: ch,
-            p: cur.o,
-            k: (save((ch = ch === '[' ? [] : {}), 1), tmp),
-            o: ch,
-          }
-          break
-        case ']':
-        case '}':
-          save(val, 0, 1)
-          if (QUOTES[cur.t] !== ch) {
-            error('Incorrect closing bracket')
-          }
-          if (reviverList && cur.p) reviverList.push([cur.p, cur.k, cur.o, {}])
-          cur = env.pop()!
-          break
-        case "'":
-        case '"':
-          save(val)
-          /**
-           * Instead of adding strings, an array is used.
-           * To avoid creating unnecessary strings in heap.
-           */
-          tmp = ['']
-          RX_FOR_STRINGS.lastIndex = RX_FOR_PARSING.lastIndex
-          for (; (val = RX_FOR_STRINGS.exec(text)); ) {
-            if (val[5] === ch) {
-              break
-            } else {
-              tmp.push(
-                val[1] || val[2]
-                  ? fromCharCode(toInt(val[1] || val[2], 16))
-                  : val[4] || META_SYMBOLS[val[3]] || val[3] || val[5] || ''
-              )
-            }
-          }
-          val = tmp.join('')
-          if (reviverList) {
-            source = text.slice(index, RX_FOR_STRINGS.lastIndex || len)
-          }
-          index = RX_FOR_PARSING.lastIndex = RX_FOR_STRINGS.lastIndex || len
-          break
-        default:
-          // if not comment
-          if (ch[0] !== '/' || (ch[1] !== '/' && ch[1] !== '*')) {
+      if ((ch = match[1])) {
+        index = match.index
+        switch (ch) {
+          case ',':
+            save(val, 0, 1)
+            break
+          case ':':
+            save(root, 0, 1)
+            key = val
+            val = root
+            break
+          case '[':
+          case '{':
             save(val)
-
+            env.push(cur)
+            /**
+             * I use free variables so that I don't create extra
+             * ones just to reduce the size. Because this is the
+             * code in the library, not in the product.
+             */
+            cur = {
+              t: ch,
+              p: cur.o,
+              k: (save((ch = ch === '[' ? [] : {}), 1), tmp),
+              o: ch,
+            }
+            break
+          case ']':
+          case '}':
+            save(val, 0, 1)
+            if (QUOTES[cur.t] !== ch) {
+              error('Incorrect closing bracket')
+            }
+            if (reviverList && cur.p) {
+              reviverList.push([cur.p, cur.k, cur.o, {}])
+            }
+            cur = env.pop()!
+            break
+          case "'":
+          case '"':
+            save(val)
+            /**
+             * Instead of adding strings, an array is used.
+             * To avoid creating unnecessary strings in heap.
+             */
+            tmp = ['']
+            RX_FOR_STRINGS.lastIndex = RX_FOR_PARSING.lastIndex
+            for (; (val = RX_FOR_STRINGS.exec(text)); ) {
+              if (val[5] === ch) {
+                break
+              } else {
+                tmp.push(
+                  val[1] || val[2]
+                    ? fromCharCode(toInt(val[1] || val[2], 16))
+                    : val[4] || META_SYMBOLS[val[3]] || val[3] || val[5] || ''
+                )
+              }
+            }
+            val = tmp.join('')
+            if (reviverList) {
+              source = text.slice(index, RX_FOR_STRINGS.lastIndex || len)
+            }
+            index = RX_FOR_PARSING.lastIndex = RX_FOR_STRINGS.lastIndex || len
+            break
+          default:
+            save(val)
             tmp = ['']
             RX_FOR_ANOTHER.lastIndex = --RX_FOR_PARSING.lastIndex
             for (; (val = RX_FOR_ANOTHER.exec(text)); ) {
@@ -190,7 +190,7 @@ export default function jsonForceParse(
             } else {
               val = ch && ((tmp = +ch) === tmp || ch === 'NaN') ? tmp : ch
             }
-          }
+        }
       }
     }
     save(val)
