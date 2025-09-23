@@ -6,10 +6,22 @@ Parse JSON-like data that contains unescaped text, comments, and extra or missin
 
 Эта библиотека парсит JSONC, JSON5 и больше. Она обрабатывает неэкранированный текст, комментарии, а так же лишние или отсутствующие запятые. Это нужно для парсинга различных JSON подобных данных, а так же данных, которые были сгенерированы нейронными сетями и могут быть не совсем валидными.
 
+Библиотека пока не выложена на `npm`, поэтому, для того чтобы ее поставить, нужно добавить в `package.json` что-то такое:
+
+```json
+{
+  "dependencies": {
+    "json-force-parse": "wareset/json-force-parse"
+  }
+}
+```
+
 Пример:
 
 ```js
-const text = `
+import jsonParse from 'json-force-parse'
+
+const data = `
 
 {
   // inline comment
@@ -34,54 +46,29 @@ exercitation',
 
 /* incorrect block comment
 `
-```
-
-Результат:
-
-```js
-const res = {
-  strings: ['double quotes', 'single quotes', 'without quotes'],
-  unicode: 'Hello',
-  hexcode: 'world',
-
-  'json5 text': 'Lorem ipsum dolor sit amet, exercitation',
-
-  commas: [1, true, null, 5, '你好世界', [], { q: 1, w: 2 }],
-
-  numbers: [1, 0, -0, NaN, -Infinity, -4.2e-9, -66],
-}
-```
-
-## Использование
-
-Библиотека пока не выложена на `npm`, поэтому, для того чтобы ее поставить, нужно добавить в `package.json` что-то такое:
-
-```json
-{
-  "dependencies": {
-    "json-force-parse": "wareset/json-force-parse"
-  }
-}
-```
-
-Пример:
-
-```js
-import jsonParse from 'json-force-parse'
-
-const json = `
-some_json
-`
 
 // Необязательный второй параметр принимает функцию обработки.
-// Она полностью соответствует работе стандартной `JSON.parse`
+// Она в точности соответствует работе `JSON.parse` в Chrome
 const reviver = function (key, value, source) {
   console.log(this, key, value, source)
   return value
 }
 
-const res = jsonParse(json, reviver)
-console.log(res)
+const res = jsonParse(data, reviver)
+
+// Результат:
+res ===
+  {
+    strings: ['double quotes', 'single quotes', 'without quotes'],
+    unicode: 'Hello',
+    hexcode: 'world',
+
+    'json5 text': 'Lorem ipsum dolor sit amet, exercitation',
+
+    commas: [1, true, null, 5, '你好世界', [], { q: 1, w: 2 }],
+
+    numbers: [1, 0, -0, NaN, -Infinity, -4.2e-9, -66],
+  }
 ```
 
 ## Обработка ошибок
