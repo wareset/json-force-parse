@@ -48,7 +48,7 @@ exercitation',
 `
 
 // Необязательный второй параметр принимает функцию обработки.
-// Она в точности соответствует работе `JSON.parse` в Chrome
+// Она в точности соответствует работе в `JSON.parse` в Chrome
 const reviver = function (key, value, source) {
   console.log(this, key, value, source)
   return value
