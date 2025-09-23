@@ -1,4 +1,4 @@
-export default function jsonLikeParse(text: string, reviver?: (this: any[] | {
+export default function jsonForceParse(text: string, reviver?: (this: any[] | {
     [key: string]: any;
 }, key: string, value: boolean | number | string | null | any[] | {
     [key: string]: any;
