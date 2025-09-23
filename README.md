@@ -1,6 +1,6 @@
 # json-force-parse
 
-Parse JSON5 or JSON like files.
+Parse JSON-like data that contains unescaped text, comments, and extra or missing commas.
 
 ## Зачем?
 
