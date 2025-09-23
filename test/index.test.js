@@ -75,6 +75,10 @@ isEqual(`{/*comment\n** */}`, {})
 isEqual(`{\t\v\f \u00A0\uFEFF\n\r\u2028\u2029\u2003}`, {})
 
 isEqual('\\', '')
+isEqual('', void 0)
+isEqual(' ', void 0)
+isEqual(' /*  */ ', void 0)
+isEqual(' // \n ', void 0)
 
 //
 // tests for reviver
