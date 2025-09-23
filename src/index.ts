@@ -151,11 +151,16 @@ export default function jsonForceParse(
                 )
               }
             }
+
             val = tmp.join('')
             if (reviverList) {
               source = text.slice(index, RX_FOR_STRINGS.lastIndex || len)
             }
             index = RX_FOR_PARSING.lastIndex = RX_FOR_STRINGS.lastIndex || len
+
+            if (!match) {
+              error('Missing closing quote')
+            }
             break
           default:
             save(val)

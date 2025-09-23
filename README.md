@@ -80,25 +80,38 @@ res ===
 ```js
 import jsonParse from 'json-force-parse'
 
-// 1. Отсутствуют закрывающая скобка в конце файла
+// 1. Отсутствуют закрывающая кавычка в конце строки
 const json_1 = `[ 1 2 3 "text ]`
 try {
   jsonParse(json_1)
 } catch (e) {
-  // Из-за пропущенной кавычки скобка попала в текст
   e ===
     {
-      error: 'Missing bracket at the end',
+      error: 'Missing closing quote',
       index: 15,
       slice: '[ 1 2 3 "text ]',
-      value: [1, 2, 3, 'text ]'],
+      value: [1, 2, 3],
     }
 }
 
-// 2. Неправильно закрыта скобка
-const json_2 = `[ [1,2], [3,4}, [5,6] ]`
+// 2. Отсутствуют закрывающая скобка в конце файла
+const json_2 = `[ 1 2 3 "text"  `
 try {
   jsonParse(json_2)
+} catch (e) {
+  e ===
+    {
+      error: 'Missing bracket at the end',
+      index: 14,
+      slice: '[ 1 2 3 "text" ',
+      value: [1, 2, 3, 'text'],
+    }
+}
+
+// 3. Неправильно закрыта скобка
+const json_3 = `[ [1,2], [3,4}, [5,6] ]`
+try {
+  jsonParse(json_3)
 } catch (e) {
   e ===
     {
@@ -112,10 +125,10 @@ try {
     }
 }
 
-// 3. Отсутствует значение для ключа
-const json_3 = `{ q: 1, w:  , e: 3, r: 4 }`
+// 4. Отсутствует значение для ключа
+const json_4 = `{ q: 1, w:  , e: 3, r: 4 }`
 try {
-  jsonParse(json_3)
+  jsonParse(json_4)
 } catch (e) {
   e ===
     {
@@ -126,10 +139,10 @@ try {
     }
 }
 
-// 4. Отсутствует ключ для значения
-const json_4 = `{ q: 1, w: 2,  : 3, r: 4 }`
+// 5. Отсутствует ключ для значения
+const json_5 = `{ q: 1, w: 2,  : 3, r: 4 }`
 try {
-  jsonParse(json_4)
+  jsonParse(json_5)
 } catch (e) {
   e ===
     {
@@ -140,10 +153,10 @@ try {
     }
 }
 
-// 5. Присутствует ключ в массиве
-const json_5 = `[1, 2, q: 3, 4 ]`
+// 6. Присутствует ключ в массиве
+const json_6 = `[1, 2, q: 3, 4 ]`
 try {
-  jsonParse(json_5)
+  jsonParse(json_6)
 } catch (e) {
   e ===
     {
