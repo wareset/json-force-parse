@@ -5,6 +5,7 @@ const RX_FOR_ANOTHER =
   /\\(?:u([\da-f]{4})|x([\da-f]{2})|(.))|((?:\/(?![/*])|[^\\{}[\],:'"/\s]+)+)|([{}[\],:'"/\s])/gi
 
 const META_SYMBOLS: any = {
+  __proto__: null,
   // https://tc39.es/ecma262/#table-string-single-character-escape-sequences
   b: '\b',
   t: '\t',
@@ -16,7 +17,7 @@ const META_SYMBOLS: any = {
   0: '\0',
 }
 
-const QUOTES: any = { '{': '}', '[': ']' }
+const BRACKETS: any = { '{': '}', '[': ']' }
 
 /*@__NO_SIDE_EFFECTS__*/
 export default function jsonForceParse(
@@ -39,6 +40,11 @@ export default function jsonForceParse(
     }
     function save(v: any, isObj?: 1 | 0, checkKey?: 1 | 0) {
       if (v !== root) {
+        if (cur.o === root && key !== '') {
+          // To intentionally cause an error
+          key === root || (cur.t = '[')
+        }
+
         cur.o[
           (tmp =
             cur.t === '['
@@ -47,9 +53,13 @@ export default function jsonForceParse(
                 : error('Key "' + key + '" in the array')
               : key !== root
                 ? key
-                : error('Value "' + v + '" without key'))
+                : error(
+                    'Value' + (isObj ? '' : ' "' + v + '"') + ' without key'
+                  ))
         ] = v
-        reviverList && (isObj || reviverList.push([cur.o, tmp, v, { source }]))
+        if (reviverList && !isObj) {
+          reviverList.push([cur.o, tmp, v, { source }])
+        }
         key = val = root
       } else if (checkKey && key !== root) {
         error('Key "' + key + '" without value')
@@ -113,7 +123,7 @@ export default function jsonForceParse(
           case ']':
           case '}':
             save(val, 0, 1)
-            if (QUOTES[cur.t] !== ch) {
+            if (BRACKETS[cur.t] !== ch) {
               error('Incorrect closing bracket')
             }
             if (reviverList && cur.p) {
@@ -130,14 +140,14 @@ export default function jsonForceParse(
              */
             tmp = ['']
             RX_FOR_STRINGS.lastIndex = RX_FOR_PARSING.lastIndex
-            for (; (val = RX_FOR_STRINGS.exec(text)); ) {
-              if (val[5] === ch) {
+            for (; (match = RX_FOR_STRINGS.exec(text)); ) {
+              if (match[5] === ch) {
                 break
               } else {
                 tmp.push(
-                  val[1] || val[2]
-                    ? fromCharCode(toInt(val[1] || val[2], 16))
-                    : val[4] || META_SYMBOLS[val[3]] || val[3] || val[5] || ''
+                  match[1] || match[2]
+                    ? fromCharCode(toInt(match[1] || match[2], 16))
+                    : match[4] || META_SYMBOLS[match[3]] || match[3] || match[5]
                 )
               }
             }
@@ -151,15 +161,15 @@ export default function jsonForceParse(
             save(val)
             tmp = ['']
             RX_FOR_ANOTHER.lastIndex = --RX_FOR_PARSING.lastIndex
-            for (; (val = RX_FOR_ANOTHER.exec(text)); ) {
-              if (val[5]) {
+            for (; (match = RX_FOR_ANOTHER.exec(text)); ) {
+              if (match[5]) {
                 --RX_FOR_ANOTHER.lastIndex
                 break
               } else {
                 tmp.push(
-                  val[1] || val[2]
-                    ? fromCharCode(toInt(val[1] || val[2], 16))
-                    : val[4] || META_SYMBOLS[val[3]] || val[3] || ''
+                  match[1] || match[2]
+                    ? fromCharCode(toInt(match[1] || match[2], 16))
+                    : match[4] || META_SYMBOLS[match[3]] || match[3]
                 )
               }
             }
