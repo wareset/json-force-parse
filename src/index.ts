@@ -40,9 +40,9 @@ export default function jsonForceParse(
     }
     function save(v: any, isObj?: 1 | 0, checkKey?: 1 | 0) {
       if (v !== root) {
-        if (cur.o === root && key !== '') {
-          // To intentionally cause an error
-          key === root || (cur.t = '[')
+        // To intentionally cause an error
+        if (cur.o === root && key !== '' && key !== root) {
+          cur.t = '['
         }
 
         cur.o[
