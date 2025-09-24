@@ -88,8 +88,8 @@ try {
   e ===
     {
       error: 'Missing closing quote',
-      index: 15,
-      slice: '[ 1 2 3 "text ]',
+      index: 8,
+      slice: '[ 1 2 3 "',
       value: [1, 2, 3],
     }
 }
