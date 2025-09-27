@@ -30,7 +30,7 @@ export default function jsonForceParse(
   ) => any
 ) {
   if (text != null) {
-    function error(message: string): never | void {
+    function error(message: string): never {
       throw {
         error: message,
         index,
