@@ -20,65 +20,218 @@ function isError(string) {
 // json5 tests from:
 // https://github.com/json5/json5/blob/main/test/parse.js
 //
+const json5_fixtures = [
+  {
+    string: `{}`,
+    result: {},
+  },
+  {
+    string: `{"a":1}`,
+    result: { a: 1 },
+  },
+  {
+    string: `{'a':1}`,
+    result: { a: 1 },
+  },
+  {
+    string: `{a:1}`,
+    result: { a: 1 },
+  },
+  {
+    string: `{$_:1,_$:2,a\u200C:3}`,
+    result: { $_: 1, _$: 2, 'a\u200C': 3 },
+  },
+  {
+    string: `{ùńîċõďë:9}`,
+    result: { ùńîċõďë: 9 },
+  },
 
-isEqual('{}', {})
-isEqual('{"a":1}', { a: 1 })
-isEqual("{'a':1}", { a: 1 })
-isEqual('{a:1}', { a: 1 })
-isEqual('{$_:1,_$:2,a\u200C:3}', { $_: 1, _$: 2, 'a\u200C': 3 })
-isEqual('{ùńîċõďë:9}', { ùńîċõďë: 9 })
+  {
+    string: `{\\u0061\\u0062:1,\\u0024\\u005F:2,\\u005F\\u0024:3}`,
+    result: { ab: 1, $_: 2, _$: 3 },
+  },
+  {
+    string: `{abc:1,def:2}`,
+    result: { abc: 1, def: 2 },
+  },
+  {
+    string: `{a:{b:2}}`,
+    result: { a: { b: 2 } },
+  },
 
-isEqual('{\\u0061\\u0062:1,\\u0024\\u005F:2,\\u005F\\u0024:3}', {
-  ab: 1,
-  $_: 2,
-  _$: 3,
-})
+  {
+    string: `[]`,
+    result: [],
+  },
+  {
+    string: `[1]`,
+    result: [1],
+  },
+  {
+    string: `[1,2]`,
+    result: [1, 2],
+  },
+  {
+    string: `[1,[2,3]]`,
+    result: [1, [2, 3]],
+  },
 
-isEqual('{abc:1,def:2}', { abc: 1, def: 2 })
-isEqual('{a:{b:2}}', { a: { b: 2 } })
+  {
+    string: `null`,
+    result: null,
+  },
+  {
+    string: `true`,
+    result: true,
+  },
+  {
+    string: `false`,
+    result: false,
+  },
 
-isEqual('[]', [])
-isEqual('[1]', [1])
-isEqual('[1,2]', [1, 2])
-isEqual('[1,[2,3]]', [1, [2, 3]])
+  {
+    string: `[0,0.,0e0]`,
+    result: [0, 0, 0],
+  },
+  {
+    string: `[1,23,456,7890]`,
+    result: [1, 23, 456, 7890],
+  },
+  {
+    string: `[-1,+2,-.1,-0]`,
+    result: [-1, +2, -0.1, -0],
+  },
+  {
+    string: `[.1,.23]`,
+    result: [0.1, 0.23],
+  },
+  {
+    string: `[1.0,1.23]`,
+    result: [1.0, 1.23],
+  },
+  {
+    string: `[1e0,1e1,1e01,1.e0,1.1e0,1e-1,1e+1]`,
+    result: [1, 1e1, 1e1, 1, 1.1, 1e-1, 1e1],
+  },
+  {
+    string: `[0x1,0x10,0xff,0xFF]`,
+    result: [1, 16, 255, 255],
+  },
+  {
+    string: `[Infinity,-Infinity]`,
+    result: [Infinity, -Infinity],
+  },
+  {
+    string: `NaN`,
+    result: NaN,
+  },
+  {
+    string: `-NaN`,
+    result: -NaN,
+  },
+  {
+    string: `1`,
+    result: 1,
+  },
+  {
+    string: `+1.23e100`,
+    result: +1.23e100,
+  },
+  {
+    string: `0x1`,
+    result: 0x1,
+  },
+  {
+    string: `-0x0123456789abcdefABCDEF`,
+    result: -0x0123456789abcdefabcdef,
+  },
 
-isEqual('null', null)
-isEqual('true', true)
-isEqual('false', false)
+  {
+    string: `"abc"`,
+    result: 'abc',
+  },
+  {
+    string: `'abc'`,
+    result: 'abc',
+  },
+  {
+    string: `['"',"'"]`,
+    result: ['"', "'"],
+  },
+  {
+    string: `'\\b\\f\\n\\r\\t\\v\\0\\x0f\\u01fF\\\n\\\r\n\\\r\\\u2028\\\u2029\\a\\'\\"'`,
+    result: `\b\f\n\r\t\v\0\x0f\u01FF\a'"`,
+  },
+  {
+    string: `'\u2028\u2029'`,
+    result: '\u2028\u2029',
+  },
+  {
+    string: `{//comment\n}`,
+    result: {},
+  },
+  {
+    string: `{}//comment`,
+    result: {},
+  },
+  {
+    string: `{/*comment\n** */}`,
+    result: {},
+  },
+  {
+    string: `{\t\v\f \u00A0\uFEFF\n\r\u2028\u2029\u2003}`,
+    result: {},
+  },
 
-isEqual('[0,0.,0e0]', [0, 0, 0])
-isEqual('[1,23,456,7890]', [1, 23, 456, 7890])
-isEqual('[-1,+2,-.1,-0]', [-1, +2, -0.1, -0])
-isEqual('[.1,.23]', [0.1, 0.23])
-isEqual('[1.0,1.23]', [1.0, 1.23])
-isEqual('[1e0,1e1,1e01,1.e0,1.1e0,1e-1,1e+1]', [1, 1e1, 1e1, 1, 1.1, 1e-1, 1e1])
-isEqual('[0x1,0x10,0xff,0xFF]', [1, 16, 255, 255])
-isEqual('[Infinity,-Infinity]', [Infinity, -Infinity])
-isEqual('NaN', NaN)
-isEqual('-NaN', -NaN)
-isEqual('1', 1)
-isEqual('+1.23e100', +1.23e100)
-isEqual('0x1', 0x1)
-isEqual('-0x0123456789abcdefABCDEF', -0x0123456789abcdefabcdef)
+  {
+    string: `\\`,
+    result: '',
+  },
+  {
+    string: ``,
+    result: void 0,
+  },
+  {
+    string: ` `,
+    result: void 0,
+  },
+  {
+    string: ` /*  */ `,
+    result: void 0,
+  },
+  {
+    string: ` // \n `,
+    result: void 0,
+  },
+]
 
-isEqual('"abc"', 'abc')
-isEqual("'abc'", 'abc')
-isEqual(`['"',"'"]`, ['"', "'"])
-isEqual(
-  `'\\b\\f\\n\\r\\t\\v\\0\\x0f\\u01fF\\\n\\\r\n\\\r\\\u2028\\\u2029\\a\\'\\"'`,
-  `\b\f\n\r\t\v\0\x0f\u01FF\a'"`
-)
-isEqual(`'\u2028\u2029'`, '\u2028\u2029')
-isEqual(`{//comment\n}`, {})
-isEqual(`{}//comment`, {})
-isEqual(`{/*comment\n** */}`, {})
-isEqual(`{\t\v\f \u00A0\uFEFF\n\r\u2028\u2029\u2003}`, {})
+for (const data of json5_fixtures) {
+  isEqual(data.string, data.result)
+}
 
-isEqual('\\', '')
-isEqual('', void 0)
-isEqual(' ', void 0)
-isEqual(' /*  */ ', void 0)
-isEqual(' // \n ', void 0)
+//
+// errors
+//
+const errors_fixtures = [
+  '[1,2,3',
+  '[1,2,3]]',
+  '[1,2,3]}',
+  '{q:1',
+  '{q:1}}',
+  '{q:1}]',
+  '[1,2,q:3,4]',
+  '{ q:1, w: , e:3, r:4 }',
+  '{ q:1, w: 2, :3, r:4 }',
+  '{ q:1, w:  e :3, r:4 }',
+  '{ q:1, w:    :3, r:4 }',
+  '12 23',
+  '12 23:45',
+  '[ "text ]',
+]
+
+for (const string of errors_fixtures) {
+  isError(string)
+}
 
 //
 // tests for reviver
@@ -166,19 +319,3 @@ isEqual(' // \n ', void 0)
 
   assert.deepStrictEqual(data, jsonForceParse(json))
 })()
-
-// errors
-isError('[1,2,3')
-isError('[1,2,3]]')
-isError('[1,2,3]}')
-isError('{q:1')
-isError('{q:1}}')
-isError('{q:1}]')
-isError('[1,2,q:3,4]')
-isError('{ q:1, w: , e:3, r:4 }')
-isError('{ q:1, w: 2, :3, r:4 }')
-isError('{ q:1, w:  e :3, r:4 }')
-isError('{ q:1, w:    :3, r:4 }')
-isError('12 23')
-isError('12 23:45')
-isError('[ "text ]')
