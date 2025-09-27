@@ -11,7 +11,7 @@ Parse JSON-like data that contains unescaped text, comments, and extra or missin
 ```json
 {
   "dependencies": {
-    "json-force-parse": "wareset/json-force-parse"
+    "json-force-parse": "github:wareset/json-force-parse"
   }
 }
 ```
