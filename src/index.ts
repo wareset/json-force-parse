@@ -165,7 +165,7 @@ export default function jsonForceParse(
           default:
             save(val)
             tmp = ['']
-            RX_FOR_ANOTHER.lastIndex = --RX_FOR_PARSING.lastIndex
+            RX_FOR_ANOTHER.lastIndex = RX_FOR_PARSING.lastIndex - 1
             for (; (match = RX_FOR_ANOTHER.exec(text)); ) {
               if (match[5]) {
                 --RX_FOR_ANOTHER.lastIndex
