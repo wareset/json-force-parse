@@ -29,7 +29,7 @@ export default function jsonForceParse(
     context: { source?: string }
   ) => any
 ) {
-  if (text != null) {
+  if (text !== void 0) {
     function error(message: string): never {
       throw {
         error: message,
