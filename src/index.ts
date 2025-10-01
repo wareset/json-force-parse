@@ -5,7 +5,7 @@ const RX_FOR_ANOTHER =
   /\\(?:u([\da-f]{4})|x([\da-f]{2})|(.))|((?:\/(?![/*])|[^\\{}[\],:'"/\s]+)+)|([{}[\],:'"/\s])/gi
 
 const META_SYMBOLS: any = {
-  __proto__: null,
+  __proto__: null as never,
   // https://tc39.es/ecma262/#table-string-single-character-escape-sequences
   b: '\b',
   t: '\t',
@@ -17,7 +17,7 @@ const META_SYMBOLS: any = {
   0: '\0',
 }
 
-const BRACKETS: any = { '{': '}', '[': ']' }
+const BRACKETS = { '{': '}', '[': ']' } as const
 
 /*@__NO_SIDE_EFFECTS__*/
 export default function jsonForceParse(
