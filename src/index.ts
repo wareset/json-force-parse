@@ -78,6 +78,8 @@ export default function jsonForceParse(
 
     const reviverList = reviver && ([] as [number, any, any, any][])
 
+    // "root" is also used as a dummy for "key" and "val".
+    // Instead of undefined.
     const root: any = {}
     const len = text.length
     let cur = { o: root } as { t: '[' | '{'; k: string; o: any; p: any }
@@ -100,6 +102,7 @@ export default function jsonForceParse(
             save(val, 0, 1)
             break
           case ':':
+            // For key check only
             save(root, 0, 1)
             key = val
             val = root
